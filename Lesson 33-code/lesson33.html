@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Web And HTML5 APIs</title>
+    <style>
+          /* Monitoring the Progress of a Read */
+
+          #progress_bar{
+            margin: 10px 0;
+            padding: 3px;
+            border: 1px solid black;
+            font-size: 1rem;
+            clear: both;
+            opacity: 0;
+            transition: opacity 1s linear;
+
+}
+
+#progress_bar.loading {
+    opacity: 3
+}
+
+#progress_bar .percent{
+    background-color: #99ccff;
+    height: auto;
+    width: 0;
+}
+
+.thumb {
+            height: 75px;
+            border: 1px solid #000;
+            margin: 10px 5px 0 0;
+        }
+    </style>
+    <script>
+
+        
+    // How does APIs Work?: Creating the Latlng object using google.maps.Latlng method so to use the API
+    
+    navigator.geolocation.getCurrentPosition(function(position) {
+        var latlng = new google.maps.LatLng(position.coord.latitude, position.coords.longitude);
+
+        var myOptions = {
+            zoom: 8,
+            center: latlng,
+            mapTypeId: google.maps.mapTypeId.TERRAIN,
+            disableDefaultUI: true
+        }
+
+        var map = new google.maps.Map(document.querySelector("#map_canvas"), myOptions);
+    });
+
+    var position = navigator.geolocation.getCurrentPosition();
+    var myLatitude = position.coords.latitude;
+    var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+
+    // APIs: creating the canvas api's context object with reference to the <canvas> element
+    // and then calling on the htmlCanvasElement.getContext() method
+
+    var canvas = document.querySelector('canvas');
+    var ctx = canvas.getContext('2d');
+
+    Ball.prototype.draw = function () {
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+        ctx.fill();
+    };
+
+    // Client-Side storage APIs
+
+    localStorage.setItem('myCat', 'Tom');
+
+    var cat = localStorage.getItem('myCat');
+
+    localStorage.removeItem('myCat');
+
+    // Testing for Availability
+
+    function storageAvailability(type) {
+        try {
+            var storage = window[type],
+                x = '__storage_test__';
+            storage.setItem(x, x);
+            storage.removeitem(x);
+            return true;
+        }
+        
+        catch (e) {
+            return e instanceof DOMException && (
+               
+                // everything except firefox
+                e.code === 22 ||
+                
+                // firefox
+                e.code === 1014 ||
+               
+                // test name field too, because code might not be present
+                // everything except firefox
+                e.name === 'QuotaExceededError' ||
+                
+                // firefox
+                e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+                
+                // acknowledge QuotaExceedError only if there's something already stored
+                storage.length !== 0;
+            if (storageAvailability('localStorage')) {
+                return "Yippee! We can use localStorage awesomeness";
+                // Yippee! We can use localStorage awesomeness
+            }
+            else {
+                "Too bad, no localStorage for us";
+                // Too bad, no localStorage for us
+            }
+
+            storageAvailable('sessionStorage');
+
+            // Selecting The File:
+
+            // First check for the various File API support.
+
+            if (window.File && window.FileReader && window.FileList &&
+                window.Blob) {
+                // Great success! All the File APIs are supported
+            } else {
+                alert('The File APIs are not fully supported in this browser')
+            }
+        }
+    }
+
+    function handleFileSelect(evt) {
+        var files = evt.target.files; // FileList object
+
+        // files is a FileList of File objects. List some properties.
+        
+        var output = []
+
+  for(var i = 0, f; f = files[i]; i++){
+
+     output.push("<li><strong>", escape(f.name), '</strong> (', f.type || 'n/a', ') -',
+
+                      f.size, 'bytes, last modified:',
+
+                      f.lastModifiedDate ?
+
+                      f.lastModifiedDate.toLocaleDateString() : 'n/a', '</li>')
+
+  }
+
+  document.getElementById('list').innerHTML = "<ul>" + output.join('') + '</ul>'
+
+}
+
+    function handleFileSelect(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+
+        var files = evt.dataTransfer.files; // FileList object.
+
+        // files is a FileList of file objects. List some properties.
+        
+        var output = [];
+        for (var i = 0, f; f = files[i]; i++) {
+            output.push(`<li><strong>`, escape(f.name), '</strong> (',
+                f.type || 'n/a', ') - ',
+                f.size, 'bytes, last modified',
+                f.lastModifiedDate ?
+                    f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                '</li>')
+        }
+        
+        document.getElementById('list').innerHTML = '<ul>' +
+            output.join('') + '</ul>';
+
+    }
+
+    function handleDragOver(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = 'copy'; // Explicitly shows this is a 
+        // copy
+    }
+
+    // Setup the dnd listeners.
+    var dropZone = document.getElementById('drop_zone');
+    dropZone.addEventListener('dragover', handleDragOver, false);
+    dropZone.addEventListener('drop', handleFileSelect, false);
+
+    // Reading files
+
+    function handleFileSelect(evt) {
+        var files = evt.target.files; // FileList object
+
+        // Loop through the FileList and render image files as thumbnails.
+        for (var i = 0, f; f = files[i]; i++) {
+
+            // only process image files.
+            if (!f.type.match('image.*')) {
+                continue;
+            }
+
+            var reader = new FileReader();
+
+            // Closure to capture the file information.
+           
+            reader.onload = (function (theFile) {
+                return function (e) {
+
+                    // Render thumbnail.
+
+                    var span = document.createElement('span');
+                    span.innerHTML = ['<img class="thumb" src="',
+                        e.target.result,
+                        '"title="', escape(theFile.name),
+                        '"/>'].join('');
+                    document.getElementById('list').insertBefore(span, null);
+                };
+            })(f);
+
+            // Read in the image file as a data URL.
+           
+            reader.readAsDataURL(f);
+
+        }
+    }
+
+    document.getElementById('files').addEventListener('change',
+        handleFileSelect, false);
+
+  </script>
+
+</head>
+
+<body>
+
+    <!-- Using Forms Input for Selecting -->
+    
+    <input type="file" id="files" name="files[]" multiple />
+    <output id="list"></output>
+
+    <!--Using Drag and Drop for Selecting-->
+
+    <div id="drop_zone">Drop files here</div>
+    <output id="list"></output>
+
+    <input type="file" id="files" name="files[]" multiple />
+    <output id="list"></output>
+
+
+    <!--Monitoring the Progress of a Read-->
+
+    <input type="file" id="files" name="file" />
+    <button onclick="abortRead();">Cancel read</button>
+    <div id="progress_bar">
+        <div class="percent">0%</div>
+    </div>
+    <canvas id="map_canvas"></canvas>
+
+</body>
+
+</html>
